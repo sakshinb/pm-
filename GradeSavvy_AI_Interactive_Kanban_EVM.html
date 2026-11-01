@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GradeSavvy AI | Kanban & EVM Control Board</title>
+<style>
+:root{--ink:#171717;--line:#bdbdbd;--muted:#666;--paper:#fff;--soft:#f5f5f5;}
+*{box-sizing:border-box} body{font-family:Arial,sans-serif;margin:0;background:var(--paper);color:var(--ink)}
+header{padding:22px 26px;border-bottom:2px solid #111} h1{margin:0 0 5px;font-size:25px} .sub{color:var(--muted);font-size:14px}
+main{padding:18px 22px;max-width:1500px;margin:auto} h2{font-size:19px;margin:22px 0 10px;border-bottom:1px solid #222;padding-bottom:6px}
+.note{border:1px solid #999;background:#fafafa;padding:10px 12px;font-size:13px;margin:12px 0}
+.metrics{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:9px}
+.metric{border:1px solid #555;padding:12px;background:white;min-height:75px} .metric small{display:block;color:#555;margin-bottom:7px} .metric strong{font-size:21px}
+.board{display:grid;grid-template-columns:repeat(5,minmax(190px,1fr));gap:10px;align-items:start;overflow-x:auto}
+.column{border:1px solid #555;background:#fafafa;min-height:240px;padding:8px}
+.colhead{display:flex;justify-content:space-between;align-items:center;font-weight:bold;border-bottom:1px solid #555;padding:5px 2px 9px;margin-bottom:8px}
+.cards{min-height:175px} .task{background:white;border:1px solid #555;padding:9px;margin:7px 0;cursor:grab}
+.task:active{cursor:grabbing} .task b{display:block;font-size:13px;margin-bottom:6px} .task small{display:block;color:#555;margin:3px 0}
+.task label{font-size:11px;display:block;margin-top:6px} input,select,button{font:inherit} .task input,.task select{width:100%;padding:4px;border:1px solid #999;background:white;font-size:12px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0} button{border:1px solid #111;background:#fff;padding:7px 11px;cursor:pointer} button:hover{background:#eee}
+.evmgrid{display:grid;grid-template-columns:repeat(4,minmax(145px,1fr));gap:9px;margin:10px 0}
+.evmgrid label{font-size:12px;color:#444} .evmgrid input{display:block;width:100%;padding:8px;border:1px solid #888;margin-top:4px}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px} th,td{border:1px solid #777;padding:7px;text-align:left} th{background:#eee}
+.chartwrap{border:1px solid #777;padding:12px;overflow-x:auto} svg{min-width:650px;width:100%;height:auto}
+.legend{font-size:12px;margin:6px 0} .swatch{display:inline-block;width:18px;height:3px;background:#111;vertical-align:middle;margin:0 5px 0 14px}
+.raci td,.raci th{text-align:center} .raci td:nth-child(1),.raci th:nth-child(1){text-align:left}
+.footer{font-size:12px;color:#555;margin:18px 0}
+@media(max-width:900px){.metrics{grid-template-columns:repeat(3,1fr)}.evmgrid{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:repeat(5,220px)}}
+
+/* Creative GradeSavvy board styling */
+:root {
+  --ink:#182033; --line:#dbe2ef; --muted:#667085; --paper:#f4f7fb;
+  --soft:#eef3fb; --navy:#172554; --purple:#6d5ce8; --teal:#0f9f95;
+}
+body { background: radial-gradient(circle at 8% 0%, #e8eaff 0, transparent 28%), linear-gradient(135deg,#f7f9ff,#edf4f8); color:var(--ink); }
+header {
+  background:linear-gradient(115deg,#172554,#4338a8 58%,#0f766e);
+  color:#fff; border:0; padding:28px 30px; position:relative; overflow:hidden;
+}
+header:after { content:""; position:absolute; width:250px;height:250px;border:1px solid #ffffff35;border-radius:50%;right:8%;top:-150px;box-shadow:0 0 0 28px #ffffff0d,0 0 0 58px #ffffff0a; }
+header h1 { font-size:29px; letter-spacing:-.7px; }
+header .sub { color:#e0e7ff; }
+main { max-width:1600px; padding:22px 26px 40px; }
+h2 { color:#202b4a; border:0; padding:0 0 9px; margin-top:28px; }
+.note { border:1px solid #cbd5e1; border-left:5px solid #6d5ce8; border-radius:12px; background:#fff; padding:13px 16px; box-shadow:0 5px 18px #23345a0a; }
+.metrics { gap:12px; }
+.metric { border:1px solid #e0e6f0; border-radius:14px; padding:15px; background:linear-gradient(145deg,#fff,#f8faff); box-shadow:0 5px 18px #25365a0b; transition:transform .18s,box-shadow .18s; }
+.metric:hover { transform:translateY(-3px); box-shadow:0 10px 22px #25365a16; }
+.metric small { color:#667085; font-weight:600; }
+.metric strong { color:#202b4a; font-size:23px; }
+.board { gap:13px; padding:4px 2px 12px; }
+.column { background:#edf1f8; border:1px solid #dce3ef; border-radius:16px; padding:10px; min-height:300px; box-shadow:inset 0 1px 0 #fff; }
+.colhead { border:0; margin:0 0 9px; padding:8px 9px 11px; color:#263451; font-size:13px; }
+.colhead span:last-child { background:#fff; border:1px solid #d5ddec; border-radius:99px; min-width:27px; text-align:center; padding:4px 7px; }
+.task { border:1px solid #dce3ef; border-radius:12px; padding:11px; margin:9px 0; box-shadow:0 4px 12px #2634510c; transition:transform .16s,box-shadow .16s; border-left:4px solid #7c83d8; }
+.task:hover { transform:translateY(-2px); box-shadow:0 8px 18px #26345117; }
+.task b { color:#1f2a44; line-height:1.35; }
+.task small { color:#667085; }
+.task label { color:#475467; font-weight:600; }
+.task input,.task select { border-radius:7px; border:1px solid #d7deea; padding:6px; color:#263451; }
+.task button { border-radius:7px; border-color:#e1a6a6; color:#a33b3b; font-size:11px; margin-top:8px; }
+.task button:hover { background:#fff0f0; }
+.controls button { border-radius:9px; border:1px solid #cbd5e1; background:#fff; color:#263451; font-weight:600; box-shadow:0 2px 6px #2634510a; }
+.controls button:first-child { background:#4338a8; color:white; border-color:#4338a8; }
+.controls button:hover { transform:translateY(-1px); }
+.evmgrid label { color:#475467; font-weight:600; }
+.evmgrid input { border-radius:8px; border:1px solid #cbd5e1; background:white; }
+table { border-radius:10px; overflow:hidden; background:white; box-shadow:0 3px 12px #2634510a; }
+th { background:#e9eef8; color:#273451; }
+td,th { border-color:#dce3ef; }
+.chartwrap { border:1px solid #dce3ef; border-radius:14px; background:white; box-shadow:0 5px 18px #25365a0a; }
+.footer { background:#eef2fb; border-radius:10px; padding:12px; }
+@media(max-width:900px) {
+  header { padding:22px 18px; }
+  main { padding:16px 14px 30px; }
+}
+
+</style>
+</head>
+<body>
+<header><h1>GradeSavvy AI — Kanban & Execution Control</h1><div class="sub">Assignment 3 | Interactive task board, process metrics, RACI and Earned Value Management</div></header>
+<main>
+<div class="note"><b>Planning-data notice:</b> Initial task statuses, completion percentages and actual costs below are illustrative examples for demonstrating the dashboard. Replace them with verified team progress before submission. The approved planning cost baseline is ₹6,49,000; management reserve is excluded.</div>
+<h2>1. Live Process Metrics</h2>
+<div class="metrics">
+ <div class="metric"><small>Tasks completed</small><strong id="mDone">—</strong></div>
+ <div class="metric"><small>Throughput (last 7 days)</small><strong id="mThroughput">—</strong></div>
+ <div class="metric"><small>Average cycle time</small><strong id="mCycle">—</strong></div>
+ <div class="metric"><small>Work in progress</small><strong id="mWip">—</strong></div>
+ <div class="metric"><small>Queue size (Backlog + To Do)</small><strong id="mQueue">—</strong></div>
+ <div class="metric"><small>Blocked / overdue</small><strong id="mBlocked">0</strong></div>
+</div>
+<h2>2. Interactive Kanban Board</h2>
+<p class="sub">Drag a card to another column, or change its status using the selector. Update owner, start date, completion date, percent complete and actual cost. Metrics and EVM recalculate automatically.</p>
+<div class="controls"><button onclick="addTask()">+ Add task</button><button onclick="resetBoard()">Reset illustrative data</button><button onclick="exportCSV()">Export task data (CSV)</button></div>
+<div class="board" id="board"></div>
+<h2>3. Responsibility Allocation — RACI Matrix</h2>
+<p class="sub">R = Responsible, A = Accountable, C = Consulted, I = Informed. Each activity has exactly one A.</p>
+<table class="raci">
+<thead><tr><th>Activity / Deliverable</th><th>Project Coordinator</th><th>Developer</th><th>ML/NLP Specialist</th><th>QA / Release Lead</th><th>Project Guide</th></tr></thead>
+<tbody>
+<tr><td>Requirements and planning</td><td>A</td><td>R</td><td>C</td><td>I</td><td>C</td></tr>
+<tr><td>Architecture and database</td><td>I</td><td>A/R</td><td>C</td><td>I</td><td>C</td></tr>
+<tr><td>Frontend/backend foundation</td><td>I</td><td>A/R</td><td>C</td><td>C</td><td>I</td></tr>
+<tr><td>Answer submission and OCR</td><td>I</td><td>C</td><td>A/R</td><td>C</td><td>I</td></tr>
+<tr><td>Question classification and NLP</td><td>I</td><td>C</td><td>A/R</td><td>C</td><td>I</td></tr>
+<tr><td>Specialized scoring and aggregation</td><td>I</td><td>C</td><td>A/R</td><td>C</td><td>I</td></tr>
+<tr><td>Feedback, results and export</td><td>I</td><td>A/R</td><td>C</td><td>C</td><td>I</td></tr>
+<tr><td>Testing and deployment</td><td>C</td><td>R</td><td>C</td><td>A/R</td><td>I</td></tr>
+<tr><td>Scope / baseline change approval</td><td>R</td><td>I</td><td>I</td><td>C</td><td>A</td></tr>
+</tbody></table>
+<h2>4. Earned Value Management (EVM)</h2>
+<div class="note">BAC (Budget at Completion) = ₹6,49,000 cost baseline. PV is derived from the 15-week planned expenditure profile in Assignment 2. EV is calculated from each task's budget × percent complete. AC is the sum of task actual costs. All figures update when task values or reporting week change.</div>
+<div class="evmgrid">
+ <label>Reporting week (1–15)<input id="week" type="number" min="1" max="15" value="8" onchange="render()"></label>
+ <label>Budget at Completion (₹)<input id="bac" type="number" min="0" value="649000" onchange="render()"></label>
+ <label>Management reserve (₹)<input id="reserve" type="number" min="0" value="32450" onchange="render()"></label>
+ <label>Schedule baseline duration (weeks)<input id="duration" type="number" min="1" value="15" onchange="render()"></label>
+</div>
+<div class="metrics">
+ <div class="metric"><small>PV — Planned Value</small><strong id="pv">—</strong></div>
+ <div class="metric"><small>EV — Earned Value</small><strong id="ev">—</strong></div>
+ <div class="metric"><small>AC — Actual Cost</small><strong id="ac">—</strong></div>
+ <div class="metric"><small>CPI — EV / AC</small><strong id="cpi">—</strong></div>
+ <div class="metric"><small>SPI — EV / PV</small><strong id="spi">—</strong></div>
+ <div class="metric"><small>EAC — BAC / CPI</small><strong id="eac">—</strong></div>
+</div>
+<table><thead><tr><th>Measure</th><th>Formula</th><th>Current result</th><th>Interpretation</th></tr></thead>
+<tbody>
+<tr><td>Cost Variance (CV)</td><td>EV − AC</td><td id="cv">—</td><td>Positive = under budget; negative = over budget.</td></tr>
+<tr><td>Schedule Variance (SV)</td><td>EV − PV</td><td id="sv">—</td><td>Positive = ahead of planned value; negative = behind.</td></tr>
+<tr><td>Estimate to Complete (ETC)</td><td>EAC − AC</td><td id="etc">—</td><td>Estimated additional cost to finish.</td></tr>
+<tr><td>Variance at Completion (VAC)</td><td>BAC − EAC</td><td id="vac">—</td><td>Positive = forecast below BAC.</td></tr>
+</tbody></table>
+<h2>5. EVM S-Curve — PV, EV and AC</h2>
+<div class="chartwrap"><svg id="evmChart" viewBox="0 0 900 390" role="img" aria-label="Earned value S curve"></svg></div>
+<div class="legend"><span class="swatch"></span>PV planned value <span class="swatch" style="height:2px;border-top:2px dashed #111;background:transparent"></span>EV earned value <span class="swatch" style="height:4px;background:#777"></span>AC actual cost</div>
+<p class="footer">Control rule: review the board weekly. If CPI or SPI falls below 1.00, investigate the cause, agree corrective action, and update forecasts. Management reserve is sponsor-controlled and is not part of the cost baseline.</p>
+</main>
+<script>
+const initialTasks=[{"id": "GS-01", "name": "Requirements and stakeholder analysis", "owner": "Project Coordinator", "status": "Done", "start": "2026-10-02", "done": "2026-10-09", "pct": 100, "budget": 45000, "actual": 42000}, {"id": "GS-02", "name": "Architecture and database design", "owner": "Backend Developer", "status": "Done", "start": "2026-10-09", "done": "2026-10-23", "pct": 100, "budget": 55000, "actual": 58000}, {"id": "GS-03", "name": "Frontend and backend foundation", "owner": "Full-stack Developer", "status": "In Progress", "start": "2026-10-23", "done": "", "pct": 65, "budget": 90000, "actual": 61000}, {"id": "GS-04", "name": "Answer submission and OCR module", "owner": "ML/OCR Developer", "status": "In Progress", "start": "2026-10-30", "done": "", "pct": 45, "budget": 95000, "actual": 39000}, {"id": "GS-05", "name": "Question classification and NLP evaluation", "owner": "NLP Developer", "status": "To Do", "start": "", "done": "", "pct": 0, "budget": 130000, "actual": 0}, {"id": "GS-06", "name": "Specialized scoring and adaptive aggregation", "owner": "Scoring Developer", "status": "Backlog", "start": "", "done": "", "pct": 0, "budget": 100000, "actual": 0}, {"id": "GS-07", "name": "Feedback, results history and CSV export", "owner": "Frontend Developer", "status": "To Do", "start": "", "done": "", "pct": 0, "budget": 45000, "actual": 0}, {"id": "GS-08", "name": "Testing, deployment and documentation", "owner": "QA / Release Lead", "status": "Backlog", "start": "", "done": "", "pct": 0, "budget": 89000, "actual": 0}];
+let tasks=JSON.parse(localStorage.getItem('gsTasks')||'null')||structuredClone(initialTasks);
+const cols=['Backlog','To Do','In Progress','Testing','Done'];
+const colIcons={'Backlog':'✦','To Do':'◷','In Progress':'⚙','Testing':'✓','Done':'★'};
+const planned=[4,5,6,6,7,8,9,10,11,10,9,7,5,2,1];
+const fmt=n=>'₹'+Math.round(n||0).toLocaleString('en-IN');
+function save(){localStorage.setItem('gsTasks',JSON.stringify(tasks));}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderBoard(){
+ const board=document.getElementById('board'); board.innerHTML='';
+ cols.forEach(col=>{
+  const items=tasks.filter(t=>t.status===col);
+  const div=document.createElement('div'); div.className='column'; div.dataset.status=col;
+  div.innerHTML=`<div class="colhead"><span>${col}</span><span>${items.length}</span></div><div class="cards"></div>`;
+  const cards=div.querySelector('.cards');
+  cards.addEventListener('dragover',e=>e.preventDefault());
+  cards.addEventListener('drop',e=>{e.preventDefault();const id=e.dataTransfer.getData('text/plain');const t=tasks.find(x=>x.id===id);if(t){t.status=col;if(col==='In Progress'&&!t.start)t.start=new Date().toISOString().slice(0,10);if(col==='Done'&&!t.done)t.done=new Date().toISOString().slice(0,10);save();render();}});
+  items.forEach(t=>{
+   const card=document.createElement('div');card.className='task';card.draggable=true;card.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',t.id));
+   card.innerHTML=`<b>${esc(t.id)} — ${esc(t.name)}</b>
+    <small>Owner: ${esc(t.owner)}</small><small>Task budget: ${fmt(t.budget)}</small>
+    <label>Status<select data-k="status">${cols.map(c=>`<option ${c===t.status?'selected':''}>${c}</option>`).join('')}</select></label>
+    <label>Owner<input data-k="owner" value="${esc(t.owner)}"></label>
+    <label>Start date<input data-k="start" type="date" value="${esc(t.start)}"></label>
+    <label>Completion date<input data-k="done" type="date" value="${esc(t.done)}"></label>
+    <label>Percent complete (%)<input data-k="pct" type="number" min="0" max="100" value="${t.pct}"></label>
+    <label>Actual cost (₹)<input data-k="actual" type="number" min="0" value="${t.actual}"></label>
+    <button type="button" data-delete>Delete task</button>`;
+   card.querySelectorAll('[data-k]').forEach(el=>el.addEventListener('change',()=>{
+    const k=el.dataset.k; t[k]=(k==='pct'||k==='actual')?Number(el.value):el.value;
+    if(k==='status'&&t.status==='Done'&&!t.done)t.done=new Date().toISOString().slice(0,10);
+    save();render();
+   }));
+   card.querySelector('[data-delete]').addEventListener('click',()=>{tasks=tasks.filter(x=>x.id!==t.id);save();render();});
+   cards.appendChild(card);
+  });
+  board.appendChild(div);
+ });
+}
+function daysBetween(a,b){if(!a||!b)return null;return Math.max(0,Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000));}
+function metrics(){
+ const done=tasks.filter(t=>t.status==='Done'&&t.done);
+ const today=new Date();const cutoff=new Date(today.getTime()-7*86400000);
+ const throughput=done.filter(t=>new Date(t.done+'T23:59:59')>=cutoff).length;
+ const cycles=done.map(t=>daysBetween(t.start,t.done)).filter(x=>x!==null);
+ const cycle=cycles.length?cycles.reduce((a,b)=>a+b,0)/cycles.length:0;
+ const wip=tasks.filter(t=>['In Progress','Testing'].includes(t.status)).length;
+ const queue=tasks.filter(t=>['Backlog','To Do'].includes(t.status)).length;
+ document.getElementById('mDone').textContent=done.length;
+ document.getElementById('mThroughput').textContent=throughput+' tasks';
+ document.getElementById('mCycle').textContent=cycle.toFixed(1)+' days';
+ document.getElementById('mWip').textContent=wip;
+ document.getElementById('mQueue').textContent=queue;
+ document.getElementById('mBlocked').textContent='0';
+}
+function evm(){
+ const week=Math.min(15,Math.max(1,Number(document.getElementById('week').value)||1));
+ const bac=Number(document.getElementById('bac').value)||0;
+ const cumulative=planned.slice(0,week).reduce((a,b)=>a+b,0)/100;
+ const pv=bac*cumulative;
+ const ev=tasks.reduce((s,t)=>s+(Number(t.budget)||0)*(Math.min(100,Math.max(0,Number(t.pct)||0))/100),0);
+ const ac=tasks.reduce((s,t)=>s+(Number(t.actual)||0),0);
+ const cpi=ac?ev/ac:0, spi=pv?ev/pv:0;
+ const eac=cpi?bac/cpi:0, etc=eac-ac, cv=ev-ac, sv=ev-pv, vac=bac-eac;
+ const vals={pv,ev,ac,cpi,spi,eac,etc,cv,sv,vac};
+ for(const [id,key] of [['pv','pv'],['ev','ev'],['ac','ac'],['cpi','cpi'],['spi','spi'],['eac','eac'],['cv','cv'],['sv','sv'],['etc','etc'],['vac','vac']]) {
+  document.getElementById(id).textContent=['cpi','spi'].includes(key)?vals[key].toFixed(2):fmt(vals[key]);
+ }
+ drawChart(bac);
+}
+function drawChart(bac){
+ const svg=document.getElementById('evmChart');const W=900,H=390,L=65,R=25,T=20,B=45, plotW=W-L-R,plotH=H-T-B;
+ const max=Math.max(bac,1);const x=i=>L+(i/14)*plotW,y=v=>T+plotH-(v/max)*plotH;
+ let s='';
+ for(let j=0;j<=5;j++){const v=max*j/5, yy=y(v);s+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#ddd"/><text x="${L-8}" y="${yy+4}" font-size="11" text-anchor="end">${Math.round(v/1000)}k</text>`;}
+ for(let i=0;i<15;i++)s+=`<text x="${x(i)}" y="${H-15}" font-size="11" text-anchor="middle">${i+1}</text>`;
+ const pvArr=[];let cum=0;planned.forEach(w=>{cum+=w;pvArr.push(bac*cum/100);});
+ const evFinal=tasks.reduce((a,t)=>a+(Number(t.budget)||0)*(Number(t.pct)||0)/100,0);
+ const acFinal=tasks.reduce((a,t)=>a+(Number(t.actual)||0),0);
+ const evArr=Array.from({length:15},(_,i)=>Math.min(evFinal,pvArr[i]*(evFinal/(pvArr[7]||1))));
+ const acArr=Array.from({length:15},(_,i)=>Math.min(acFinal,pvArr[i]*(acFinal/(pvArr[7]||1))));
+ function poly(arr,dash='',stroke='#111',width=3){return `<polyline fill="none" stroke="${stroke}" stroke-width="${width}" ${dash?`stroke-dasharray="${dash}"`:''} points="${arr.map((v,i)=>x(i)+','+y(v)).join(' ')}"/>`;}
+ s+=poly(pvArr,'','#111',3)+poly(evArr,'8 5','#444',3)+poly(acArr,'2 5','#777',3);
+ s+=`<line x1="${L}" y1="${T}" x2="${L}" y2="${T+plotH}" stroke="#111"/><line x1="${L}" y1="${T+plotH}" x2="${W-R}" y2="${T+plotH}" stroke="#111"/>`;
+ svg.innerHTML=s;
+}
+function render(){renderBoard();metrics();evm();}
+function addTask(){const id='GS-'+String(Math.max(0,...tasks.map(t=>Number((t.id.match(/\d+/)||[0])[0])))+1).padStart(2,'0');const name=prompt('Enter task name');if(!name)return;tasks.push({id,name,owner:'Unassigned',status:'Backlog',start:'',done:'',pct:0,budget:0,actual:0});save();render();}
+function resetBoard(){if(confirm('Reset all task data to the illustrative starting board?')){tasks=structuredClone(initialTasks);save();render();}}
+function exportCSV(){const cols=['id','name','owner','status','start','done','pct','budget','actual'];const lines=[cols.join(','),...tasks.map(t=>cols.map(k=>'"'+String(t[k]??'').replaceAll('"','""')+'"').join(','))];const blob=new Blob([lines.join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='GradeSavvy_Kanban_Tasks.csv';a.click();URL.revokeObjectURL(a.href);}
+render();
+</script>
+</body></html>
